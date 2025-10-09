@@ -1,4 +1,4 @@
-name: NPM Build
+name: npm-build
 
 on:
   push:
