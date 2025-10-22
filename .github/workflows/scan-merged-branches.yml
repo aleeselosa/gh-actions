@@ -22,7 +22,7 @@ jobs:
           echo "Scanning for merged branches to main.staging older than 1 day..."
           cutoff_date=$(date -d "1 day ago" +%s)
 
-          git branch -r --merged origin/main.staging | grep -E 'origin/(feature|bugfix|bug-fix|hotfix|sprint|gpt)' | while read branch; do
+          git branch -r | grep -E 'origin/(feature|bugfix|bug-fix|hotfix|sprint|gpt)' | while read branch; do
             branch_name=$(echo "$branch" | sed 's|origin/||')
             last_commit_date=$(git log -1 --format="%ct" origin/$branch_name)
 
