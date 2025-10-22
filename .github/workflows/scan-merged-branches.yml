@@ -1,0 +1,32 @@
+name: Scan Merged Branches to main.staging
+
+on:
+  schedule:
+    - cron: '0 22 * * 5'  # Every Saturday 6:00 AM PH time (UTC+8)
+  workflow_dispatch:     # Manual trigger
+
+jobs:
+  scan-branches:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main.staging
+        uses: actions/checkout@v3
+        with:
+          ref: main.staging
+
+      - name: Fetch all branches
+        run: git fetch --all --prune
+
+      - name: List merged branches older than 1 day
+        run: |
+          echo "Scanning for merged branches to main.staging older than 1 day..."
+          cutoff_date=$(date -d "1 day ago" +%s)
+
+          git branch -r --merged origin/main.staging | grep -E 'origin/(feature|bugfix|bug-fix|hotfix|sprint|gpt)' | while read branch; do
+            branch_name=$(echo "$branch" | sed 's|origin/||')
+            last_commit_date=$(git log -1 --format="%ct" origin/$branch_name)
+
+            if [ "$last_commit_date" -lt "$cutoff_date" ]; then
+              echo "Dry run: $branch_name is merged to main.staging and older than 1 day"
+            fi
+          done
